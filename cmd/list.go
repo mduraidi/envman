@@ -11,7 +11,11 @@ var listCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List available SDKs and versions",
 	Run: func(cmd *cobra.Command, args []string) {
-		sdks, err := internal.DiscoverSDKs(sdkRoot)
+		root := sdkRoot
+		if root == "" {
+			root = getDefaultSDKRoot()
+		}
+		sdks, err := internal.DiscoverSDKs(root)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error discovering SDKs: %v\n", err)
 			os.Exit(1)

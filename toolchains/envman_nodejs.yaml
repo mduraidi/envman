@@ -1,0 +1,19 @@
+name: nodejs
+steps:
+  - type: select
+    var: pkg_manager
+    message: "Choose package manager"
+    options: ["npm", "yarn"]
+    default: npm
+  - type: run
+    when: "{pkg_manager}" == "npm"
+    command: "{npm_exe}"
+    args: ["init", "-y"]
+  - type: run
+    when: "{pkg_manager}" == "yarn"
+    command: "{yarn_exe}"
+    args: ["init", "-y"]
+  - type: message
+    text: "Node.js project initialized with {pkg_manager}"
+env_vars:
+  NODE_VERSION: "{version}"

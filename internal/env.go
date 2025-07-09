@@ -5,15 +5,9 @@ import (
 	"os"
 )
 
-type EnvConfig struct {
-	Dotnet string `json:"dotnet"`
-	Python string `json:"python"`
-	Nodejs string `json:"nodejs"`
-	Golang string `json:"golang"`
-	Java   string `json:"java"`
-}
+type EnvConfig map[string]string
 
-func LoadEnvConfig(path string) (*EnvConfig, error) {
+func LoadEnvConfig(path string) (EnvConfig, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -23,10 +17,10 @@ func LoadEnvConfig(path string) (*EnvConfig, error) {
 	if err := json.NewDecoder(f).Decode(&cfg); err != nil {
 		return nil, err
 	}
-	return &cfg, nil
+	return cfg, nil
 }
 
-func SaveEnvConfig(path string, cfg *EnvConfig) error {
+func SaveEnvConfig(path string, cfg EnvConfig) error {
 	f, err := os.Create(path)
 	if err != nil {
 		return err

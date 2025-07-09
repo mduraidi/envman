@@ -1,0 +1,27 @@
+name: java
+steps:
+  - type: select
+    var: build_tool
+    message: "Choose build tool"
+    options: ["maven", "gradle"]
+    default: maven
+  - type: prompt
+    var: group_id
+    message: "Enter groupId"
+    default: "com.example"
+  - type: prompt
+    var: artifact_id
+    message: "Enter artifactId"
+    default: "{cwd_basename}"
+  - type: run
+    when: "{build_tool}" == "maven"
+    command: "mvn"
+    args: ["archetype:generate", "-DgroupId={group_id}", "-DartifactId={artifact_id}", "-DinteractiveMode=false"]
+  - type: run
+    when: "{build_tool}" == "gradle"
+    command: "gradle"
+    args: ["init", "--type", "java-application"]
+  - type: message
+    text: "Java project initialized with {build_tool}"
+env_vars:
+  JAVA_VERSION: "{version}"

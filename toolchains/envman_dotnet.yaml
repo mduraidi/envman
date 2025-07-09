@@ -1,0 +1,9 @@
+name: dotnet
+steps:
+  - type: run
+    command: "{dotnet_exe}"
+    args: ["new", "console"]
+  - type: message
+    text: ".NET console project created"
+env_vars:
+  DOTNET_VERSION: "{version}"

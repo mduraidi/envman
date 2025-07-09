@@ -12,16 +12,34 @@ import (
 
 var selectCmd = &cobra.Command{
 	Use:   "select",
-	Short: "Interactively select SDKs for the environment",
+	Short: "Interactively select SDKs for the environment (dynamic)",
 	Run: func(cmd *cobra.Command, args []string) {
-		sdks, err := internal.DiscoverSDKs(sdkRoot)
+		root := sdkRoot
+		if root == "" {
+			root = getDefaultSDKRoot()
+		}
+		sdks, err := internal.DiscoverSDKs(root)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error discovering SDKs: %v\n", err)
 			os.Exit(1)
 		}
-		cfg := &internal.EnvConfig{}
+		// Dynamically list toolchains from toolchains folder
+		toolchainFiles, err := os.ReadDir("toolchains")
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to read toolchains folder: %v\n", err)
+			os.Exit(1)
+		}
+		toolchains := make([]string, 0)
+		for _, f := range toolchainFiles {
+			if f.IsDir() || !strings.HasPrefix(f.Name(), "envman_") || !strings.HasSuffix(f.Name(), ".yaml") {
+				continue
+			}
+			name := strings.TrimSuffix(strings.TrimPrefix(f.Name(), "envman_"), ".yaml")
+			toolchains = append(toolchains, name)
+		}
+		cfg := make(map[string]string)
 		reader := bufio.NewReader(os.Stdin)
-		for _, lang := range []string{"dotnet", "python", "nodejs", "golang", "java"} {
+		for _, lang := range toolchains {
 			infos := sdks[lang]
 			if len(infos) == 0 {
 				fmt.Fprintf(os.Stderr, "Warning: No %s SDKs found.\n", lang)
@@ -40,28 +58,15 @@ var selectCmd = &cobra.Command{
 				fmt.Sscanf(input, "%d", &idx)
 				if idx > 0 && idx <= len(infos) {
 					ver = infos[idx-1].Version
-				} else {
-					fmt.Fprintf(os.Stderr, "Invalid selection for %s, using default.\n", lang)
 				}
 			}
-			switch lang {
-			case "dotnet":
-				cfg.Dotnet = ver
-			case "python":
-				cfg.Python = ver
-			case "nodejs":
-				cfg.Nodejs = ver
-			case "golang":
-				cfg.Golang = ver
-			case "java":
-				cfg.Java = ver
-			}
+			cfg[lang] = ver
 		}
 		if err := internal.SaveEnvConfig("envman.json", cfg); err != nil {
-			fmt.Fprintf(os.Stderr, "Failed to write envman.json: %v\n", err)
+			fmt.Fprintf(os.Stderr, "Failed to save envman.json: %v\n", err)
 			os.Exit(1)
 		}
-		fmt.Println("envman.json updated with selected SDK versions.")
+		fmt.Println("Updated envman.json with selected SDK versions.")
 	},
 }
 

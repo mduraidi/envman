@@ -13,7 +13,7 @@ REM =============================================================
 REM Configure environment
 setlocal
 set GO111MODULE=on
-set GOROOT=D:\envman\sdks\go\1.24.5
+set GOROOT=D:\envman\envman_sdks\golang\1.24.5
 set PATH=%GOROOT%\bin;%PATH%
 
 REM Validate Go binary presence

@@ -1,0 +1,17 @@
+name: python
+steps:
+  - type: prompt
+    var: venv_dir
+    message: "Enter venv directory"
+    default: venv
+  - type: run
+    command: "{python_exe}"
+    args: ["-m", "venv", "{venv_dir}"]
+  - type: file
+    path: requirements.txt
+    content: |
+      # Add your dependencies here
+  - type: message
+    text: "Python venv created in {venv_dir}"
+env_vars:
+  PYTHON_VERSION: "{version}"

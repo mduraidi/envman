@@ -1,0 +1,13 @@
+name: golang
+steps:
+  - type: prompt
+    var: module_name
+    message: "Enter Go module name"
+    default: "{cwd_basename}"
+  - type: run
+    command: "{go_exe}"
+    args: ["mod", "init", "{module_name}"]
+  - type: message
+    text: "Go module {module_name} initialized"
+env_vars:
+  GOLANG_VERSION: "{version}"
